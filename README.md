@@ -37,7 +37,7 @@ A powerful web application for comparing JSON arrays with advanced query filteri
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/json-array-comparator.git
+   git clone https://github.com/ahmedazier/json-array-comparator.git
    cd json-array-comparator
    ```
 
@@ -218,8 +218,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/json-array-comparator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/json-array-comparator/discussions)
+- **Issues**: [GitHub Issues](https://github.com/ahmedazier/json-array-comparator/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ahmedazier/json-array-comparator/discussions)
 - **Email**: support@jsonarraycomparator.com
 
 ---
