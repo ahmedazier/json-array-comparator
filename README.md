@@ -220,7 +220,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/ahmedazier/json-array-comparator/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ahmedazier/json-array-comparator/discussions)
-- **Email**: support@jsonarraycomparator.com
+- **Email**: hello@ahmedazier.com
 
 ---
 
