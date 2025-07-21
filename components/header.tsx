@@ -1,13 +1,35 @@
-"use client"
+"use client";
 
-import { ArrowUpDown, Github, Home, Info, Settings, FileText, Menu, X } from "lucide-react";
+import {
+  ArrowUpDown,
+  Github,
+  Home,
+  Info,
+  Settings,
+  FileText,
+  Menu,
+  X
+} from "lucide-react";
 import { ModeToggle } from "./toggle-mode";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from "./ui/sheet";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs'
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,23 +38,23 @@ export function Header() {
     {
       href: "/",
       label: "Home",
-      icon: Home,
+      icon: Home
     },
     {
       href: "/about",
       label: "About",
-      icon: Info,
+      icon: Info
     },
     {
       href: "/docs",
       label: "Documentation",
-      icon: FileText,
+      icon: FileText
     },
     {
       href: "/settings",
       label: "Settings",
-      icon: Settings,
-    },
+      icon: Settings
+    }
   ];
 
   return (
@@ -48,9 +70,7 @@ export function Header() {
               JSON Array Comparator
             </span>
           </div>
-          <Badge 
-            className="ml-2 text-xs font-medium rounded-full px-2.5 py-0.5 transition-all duration-300 cursor-pointer"
-          >
+          <Badge className="ml-2 text-xs font-medium rounded-full px-2.5 py-0.5 transition-all duration-300 cursor-pointer">
             Beta
           </Badge>
         </div>
@@ -84,21 +104,32 @@ export function Header() {
             className="hidden sm:flex items-center gap-2 border-border/50 bg-background/50 backdrop-blur-sm hover:bg-accent/50 transition-all duration-200"
             asChild
           >
-            <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Github className="h-4 w-4" />
               <span className="hidden sm:inline">GitHub</span>
             </Link>
           </Button>
           <ModeToggle />
-          
+          <SignedOut>
+            <SignInButton />
+            <SignUpButton>
+              <button className="cursor-pointer bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5">
+                Sign Up
+              </button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+
           {/* Mobile Menu Button */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="md:hidden"
-              >
+              <Button variant="outline" size="sm" className="md:hidden">
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
@@ -136,7 +167,11 @@ export function Header() {
                     className="w-full justify-start gap-3"
                     asChild
                   >
-                    <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+                    <Link
+                      href="https://github.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Github className="h-5 w-5" />
                       <span>GitHub</span>
                     </Link>
