@@ -432,12 +432,12 @@ export default function Component() {
       {comparisonResult && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 mb-4">
               <Search className="w-5 h-5" />
               Filtered Comparison Results
             </CardTitle>
             <div className="space-y-2">
-              <div className="flex gap-4 text-sm">
+              <div className="flex flex-col gap-4 text-sm mb-4 md:flex-row">
                 <Badge variant="destructive" className="flex items-center gap-1">
                   <Minus className="w-3 h-3" />
                   {comparisonResult.deletions.length} Deletions
