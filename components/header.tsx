@@ -7,8 +7,7 @@ import {
   Info,
   Settings,
   FileText,
-  Menu,
-  X
+  Menu
 } from "lucide-react";
 import { ModeToggle } from "./toggle-mode";
 import { Badge } from "./ui/badge";

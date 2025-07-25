@@ -9,21 +9,15 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { QueryParser, QueryExecutor, type ParsedQuery } from "@/lib/query-parser"
+import { QueryParser, QueryExecutor } from "@/lib/query-parser"
+import type { ParsedQuery, QueryBuilderProps, JsonItem } from "@/lib/types"
 import { AlertCircle, HelpCircle, Play, Code } from "lucide-react"
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
-
-interface QueryBuilderProps {
-  data: any[]
-  onQueryChange: (query: ParsedQuery, filteredData: any[]) => void
-  label: string
-  placeholder?: string
-}
 
 export function QueryBuilder({ data, onQueryChange, label, placeholder }: QueryBuilderProps) {
   const [queryString, setQueryString] = useState("")
   const [parsedQuery, setParsedQuery] = useState<ParsedQuery>({ conditions: [], isValid: true })
-  const [filteredData, setFilteredData] = useState<any[]>(data)
+  const [filteredData, setFilteredData] = useState<JsonItem[]>(data)
   const [showHelp, setShowHelp] = useState(false)
 
   const handleQueryChange = (newQuery: string) => {

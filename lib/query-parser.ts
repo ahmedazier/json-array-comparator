@@ -1,15 +1,4 @@
-export interface QueryCondition {
-    property: string
-    operator: string
-    value: any
-    logicalOperator?: "AND" | "OR"
-  }
-  
-  export interface ParsedQuery {
-    conditions: QueryCondition[]
-    isValid: boolean
-    error?: string
-  }
+import type { QueryCondition, ParsedQuery, JsonItem } from './types'
   
   export class QueryParser {
     private static readonly OPERATORS = [
@@ -98,7 +87,7 @@ export interface QueryCondition {
       return { property, operator: operator.toLowerCase(), value }
     }
   
-    private static parseValue(valueStr: string, operator: string): any {
+    private static parseValue(valueStr: string, operator: string): unknown {
       if (!valueStr && !["exists", "not exists"].includes(operator.toLowerCase())) {
         throw new Error(`Value is required for operator: ${operator}`)
       }
@@ -116,7 +105,7 @@ export interface QueryCondition {
       return this.parseSimpleValue(valueStr)
     }
   
-    private static parseSimpleValue(valueStr: string): any {
+    private static parseSimpleValue(valueStr: string): unknown {
       if (!valueStr) return null
   
       // Remove quotes if present
@@ -141,7 +130,7 @@ export interface QueryCondition {
   }
   
   export class QueryExecutor {
-    static execute(data: any[], query: ParsedQuery): any[] {
+    static execute(data: JsonItem[], query: ParsedQuery): JsonItem[] {
       if (!query.isValid || query.conditions.length === 0) {
         return data
       }
@@ -149,7 +138,7 @@ export interface QueryCondition {
       return data.filter((item) => this.evaluateItem(item, query.conditions))
     }
   
-    private static evaluateItem(item: any, conditions: QueryCondition[]): boolean {
+    private static evaluateItem(item: JsonItem, conditions: QueryCondition[]): boolean {
       if (conditions.length === 0) return true
   
       let result = this.evaluateCondition(item, conditions[0])
@@ -168,7 +157,7 @@ export interface QueryCondition {
       return result
     }
   
-    private static evaluateCondition(item: any, condition: QueryCondition): boolean {
+    private static evaluateCondition(item: JsonItem, condition: QueryCondition): boolean {
       const value = this.getNestedValue(item, condition.property)
   
       switch (condition.operator) {
@@ -177,13 +166,13 @@ export interface QueryCondition {
         case "!=":
           return value !== condition.value
         case ">":
-          return value > condition.value
+          return typeof value === 'number' && typeof condition.value === 'number' && value > condition.value
         case "<":
-          return value < condition.value
+          return typeof value === 'number' && typeof condition.value === 'number' && value < condition.value
         case ">=":
-          return value >= condition.value
+          return typeof value === 'number' && typeof condition.value === 'number' && value >= condition.value
         case "<=":
-          return value <= condition.value
+          return typeof value === 'number' && typeof condition.value === 'number' && value <= condition.value
         case "contains":
           return typeof value === "string" && value.toLowerCase().includes(String(condition.value).toLowerCase())
         case "startswith":
@@ -212,8 +201,13 @@ export interface QueryCondition {
       }
     }
   
-    private static getNestedValue(obj: any, path: string): any {
-      return path.split(".").reduce((current, key) => current?.[key], obj)
+    private static getNestedValue(obj: JsonItem, path: string): unknown {
+      return path.split(".").reduce((current: unknown, key: string) => {
+        if (current && typeof current === 'object' && !Array.isArray(current)) {
+          return (current as Record<string, unknown>)[key]
+        }
+        return undefined
+      }, obj as unknown)
     }
   }
   
