@@ -97,7 +97,7 @@ export function Header() {
         </nav>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -117,7 +117,7 @@ export function Header() {
           <SignedOut>
             <SignInButton />
             <SignUpButton>
-              <button className="cursor-pointer bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5">
+              <button className="cursor-pointer bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-8 sm:h-8 px-4 sm:px-3">
                 Sign Up
               </button>
             </SignUpButton>
