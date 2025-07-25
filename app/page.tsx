@@ -1,8 +1,6 @@
-import Image from "next/image";
-import { ModeToggle } from "@/components/toggle-mode";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import  Component  from "@/components/tools/json-array";
+import Component from "@/components/tools/json-array";
 
 export default function Home() {
   return (

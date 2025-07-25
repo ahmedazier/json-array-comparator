@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -10,31 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertCircle, CheckCircle, Plus, Minus, Edit, ArrowUpDown, Filter, Search } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { QueryBuilder } from "./query-builder"
-import type { ParsedQuery } from "@/lib/query-parser"
-
-interface ComparisonResult {
-  additions: any[]
-  deletions: any[]
-  modifications: Array<{
-    original: any
-    modified: any
-    differences: string[]
-  }>
-  identical: any[]
-  originalCount: number
-  filteredCount: number
-  queries: {
-    array1: ParsedQuery
-    array2: ParsedQuery
-  }
-}
-
-interface DiffItem {
-  type: "addition" | "deletion" | "modification" | "identical"
-  item: any
-  differences?: string[]
-  original?: any
-}
+import type { ParsedQuery, ComparisonResult, DiffItem, JsonItem } from "@/lib/types"
 
 export default function Component() {
   const [array1Input, setArray1Input] = useState(`[
@@ -59,22 +35,31 @@ export default function Component() {
   // Query states
   const [array1Query, setArray1Query] = useState<ParsedQuery>({ conditions: [], isValid: true })
   const [array2Query, setArray2Query] = useState<ParsedQuery>({ conditions: [], isValid: true })
-  const [filteredArray1, setFilteredArray1] = useState<any[]>([])
-  const [filteredArray2, setFilteredArray2] = useState<any[]>([])
+  const [filteredArray1, setFilteredArray1] = useState<JsonItem[]>([])
+  const [filteredArray2, setFilteredArray2] = useState<JsonItem[]>([])
 
-  const parseJsonArray = (input: string): any[] | null => {
+  const parseJsonArray = (input: string): JsonItem[] | null => {
     try {
       const parsed = JSON.parse(input)
       if (!Array.isArray(parsed)) {
         throw new Error("Input must be an array")
       }
-      return parsed
-    } catch (err) {
+      return parsed as JsonItem[]
+    } catch {
       return null
     }
   }
 
-  const sortArray = (array: any[], sortKey: string): any[] => {
+  const getNestedValue = useCallback((obj: JsonItem, path: string): unknown => {
+    return path.split(".").reduce((current: unknown, key: string) => {
+      if (current && typeof current === 'object' && !Array.isArray(current)) {
+        return (current as Record<string, unknown>)[key]
+      }
+      return undefined
+    }, obj as unknown)
+  }, [])
+
+  const sortArray = useCallback((array: JsonItem[], sortKey: string): JsonItem[] => {
     if (sortKey === "none") return [...array]
 
     return [...array].sort((a, b) => {
@@ -89,15 +74,11 @@ export default function Component() {
         return aVal.localeCompare(bVal)
       }
 
-      return aVal < bVal ? -1 : 1
+      return (aVal as number) < (bVal as number) ? -1 : 1
     })
-  }
+  }, [getNestedValue])
 
-  const getNestedValue = (obj: any, path: string): any => {
-    return path.split(".").reduce((current, key) => current?.[key], obj)
-  }
-
-  const deepEqual = (obj1: any, obj2: any): boolean => {
+  const deepEqual = useCallback((obj1: unknown, obj2: unknown): boolean => {
     if (obj1 === obj2) return true
 
     if (obj1 == null || obj2 == null) return false
@@ -108,20 +89,22 @@ export default function Component() {
 
     if (Array.isArray(obj1) !== Array.isArray(obj2)) return false
 
-    if (Array.isArray(obj1)) {
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
       if (obj1.length !== obj2.length) return false
       return obj1.every((item, index) => deepEqual(item, obj2[index]))
     }
 
-    const keys1 = Object.keys(obj1)
-    const keys2 = Object.keys(obj2)
+    const record1 = obj1 as Record<string, unknown>
+    const record2 = obj2 as Record<string, unknown>
+    const keys1 = Object.keys(record1)
+    const keys2 = Object.keys(record2)
 
     if (keys1.length !== keys2.length) return false
 
-    return keys1.every((key) => keys2.includes(key) && deepEqual(obj1[key], obj2[key]))
-  }
+    return keys1.every((key) => keys2.includes(key) && deepEqual(record1[key], record2[key]))
+  }, [])
 
-  const findDifferences = (obj1: any, obj2: any, path = ""): string[] => {
+  const findDifferences = useCallback((obj1: unknown, obj2: unknown, path = ""): string[] => {
     const differences: string[] = []
 
     if (typeof obj1 !== typeof obj2) {
@@ -155,24 +138,26 @@ export default function Component() {
       return differences
     }
 
-    const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)])
+    const record1 = obj1 as Record<string, unknown>
+    const record2 = obj2 as Record<string, unknown>
+    const allKeys = new Set([...Object.keys(record1), ...Object.keys(record2)])
 
     for (const key of allKeys) {
       const newPath = path ? `${path}.${key}` : key
 
-      if (!(key in obj1)) {
-        differences.push(`${newPath}: property added with value ${JSON.stringify(obj2[key])}`)
-      } else if (!(key in obj2)) {
-        differences.push(`${newPath}: property removed (was ${JSON.stringify(obj1[key])})`)
+      if (!(key in record1)) {
+        differences.push(`${newPath}: property added with value ${JSON.stringify(record2[key])}`)
+      } else if (!(key in record2)) {
+        differences.push(`${newPath}: property removed (was ${JSON.stringify(record1[key])})`)
       } else {
-        differences.push(...findDifferences(obj1[key], obj2[key], newPath))
+        differences.push(...findDifferences(record1[key], record2[key], newPath))
       }
     }
 
     return differences
-  }
+  }, [])
 
-  const findMatchingItem = (item: any, array: any[], sortKey: string): any => {
+  const findMatchingItem = useCallback((item: JsonItem, array: JsonItem[], sortKey: string): JsonItem | undefined => {
     if (sortKey === "none") {
       return array.find((arrayItem) => deepEqual(item, arrayItem))
     }
@@ -182,11 +167,11 @@ export default function Component() {
       const arrayItemKey = getNestedValue(arrayItem, sortKey)
       return itemKey === arrayItemKey
     })
-  }
+  }, [deepEqual, getNestedValue])
 
-  const compareArrays = (
-    arr1: any[],
-    arr2: any[],
+  const compareArrays = useCallback((
+    arr1: JsonItem[],
+    arr2: JsonItem[],
     sortKey: string,
     queries: { array1: ParsedQuery; array2: ParsedQuery },
   ): ComparisonResult => {
@@ -230,7 +215,7 @@ export default function Component() {
     }
 
     return result
-  }
+  }, [deepEqual, findDifferences, findMatchingItem, sortArray])
 
   const comparisonResult = useMemo(() => {
     setError("")
@@ -256,7 +241,7 @@ export default function Component() {
       array1: array1Query,
       array2: array2Query,
     })
-  }, [array1Input, array2Input, sortBy, filteredArray1, filteredArray2, array1Query, array2Query])
+  }, [array1Input, array2Input, sortBy, filteredArray1, filteredArray2, array1Query, array2Query, compareArrays])
 
   const getSortKeys = (): string[] => {
     const array1 = parseJsonArray(array1Input)
@@ -265,14 +250,15 @@ export default function Component() {
     const keys = new Set<string>()
     keys.add("none")
 
-    const extractKeys = (obj: any, prefix = "") => {
+    const extractKeys = (obj: JsonItem, prefix = "") => {
       if (typeof obj === "object" && obj !== null && !Array.isArray(obj)) {
         Object.keys(obj).forEach((key) => {
           const fullKey = prefix ? `${prefix}.${key}` : key
-          if (typeof obj[key] !== "object" || obj[key] === null) {
+          const value = obj[key]
+          if (typeof value !== "object" || value === null) {
             keys.add(fullKey)
-          } else if (!Array.isArray(obj[key])) {
-            extractKeys(obj[key], fullKey)
+          } else if (!Array.isArray(value)) {
+            extractKeys(value as JsonItem, fullKey)
           }
         })
       }
@@ -282,7 +268,7 @@ export default function Component() {
     return Array.from(keys)
   }
 
-  const formatJson = (obj: any): string => {
+  const formatJson = (obj: JsonItem): string => {
     return JSON.stringify(obj, null, 2)
   }
 
