@@ -113,18 +113,6 @@ export function Header() {
               <span className="hidden sm:inline">GitHub</span>
             </Link>
           </Button>
-          <ModeToggle />
-          <SignedOut>
-            <SignInButton />
-            <SignUpButton>
-              <button className="cursor-pointer bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-8 sm:h-8 px-4 sm:px-3">
-                Sign Up
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
 
           {/* Mobile Menu Button */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -161,21 +149,54 @@ export function Header() {
                     </Link>
                   );
                 })}
-                <div className="mt-4 pt-4 border-t">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-3"
-                    asChild
-                  >
-                    <Link
-                      href="https://github.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                
+                {/* Mobile Authentication Section */}
+                <div className="mt-6 pt-6 border-t border-border/50">
+                  <div className="flex flex-col gap-4 px-2">
+                    {/* Mode Toggle */}
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm font-medium text-muted-foreground">Theme</span>
+                      <ModeToggle />
+                    </div>
+                    
+                    {/* GitHub Link */}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-3 py-3"
+                      asChild
                     >
-                      <Github className="h-5 w-5" />
-                      <span>GitHub</span>
-                    </Link>
-                  </Button>
+                      <Link
+                        href="https://github.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Github className="h-5 w-5" />
+                        <span>GitHub</span>
+                      </Link>
+                    </Button>
+                    
+                    {/* Authentication Buttons */}
+                    <SignedOut>
+                      <div className="flex flex-col gap-3 pt-2">
+                        <SignInButton>
+                          <Button variant="outline" className="w-full justify-start gap-3 py-3">
+                            <span>Sign In</span>
+                          </Button>
+                        </SignInButton>
+                        <SignUpButton>
+                          <Button className="w-full justify-start gap-3 py-3">
+                            <span>Sign Up</span>
+                          </Button>
+                        </SignUpButton>
+                      </div>
+                    </SignedOut>
+                    <SignedIn>
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm font-medium text-muted-foreground">Account</span>
+                        <UserButton />
+                      </div>
+                    </SignedIn>
+                  </div>
                 </div>
               </nav>
             </SheetContent>
