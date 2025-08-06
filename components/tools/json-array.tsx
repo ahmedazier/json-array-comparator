@@ -1,14 +1,16 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertCircle, CheckCircle, Plus, Minus, Edit, ArrowUpDown, Filter, Search } from "lucide-react"
+import { AlertCircle, CheckCircle, Plus, Minus, Edit, ArrowUpDown, Filter, Search, Copy, Check } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import { QueryBuilder } from "./query-builder"
 import type { ParsedQuery } from "@/lib/query-parser"
 
@@ -55,6 +57,7 @@ export default function Component() {
 
   const [sortBy, setSortBy] = useState<string>("id")
   const [error, setError] = useState<string>("")
+  const [copiedField, setCopiedField] = useState<string | null>(null)
 
   // Query states
   const [array1Query, setArray1Query] = useState<ParsedQuery>({ conditions: [], isValid: true })
@@ -286,6 +289,34 @@ export default function Component() {
     return JSON.stringify(obj, null, 2)
   }
 
+  const copyToClipboard = async (text: string, fieldName: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedField(fieldName)
+      toast.success(`${fieldName} copied to clipboard`)
+      setTimeout(() => setCopiedField(null), 2000)
+    } catch (err) {
+      toast.error("Failed to copy to clipboard")
+    }
+  }
+
+  // Show toast notifications for comparison results
+  useEffect(() => {
+    if (comparisonResult) {
+      const totalChanges = comparisonResult.additions.length + comparisonResult.deletions.length + comparisonResult.modifications.length
+      
+      if (totalChanges === 0) {
+        toast.success("Arrays are identical!", {
+          description: "No differences found between the arrays."
+        })
+      } else {
+        toast.info(`Comparison complete!`, {
+          description: `${comparisonResult.additions.length} additions, ${comparisonResult.deletions.length} deletions, ${comparisonResult.modifications.length} modifications found.`
+        })
+      }
+    }
+  }, [comparisonResult])
+
   const getDiffItems = (): DiffItem[] => {
     if (!comparisonResult) return []
 
@@ -349,7 +380,21 @@ export default function Component() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="array1">Array 1 (JSON)</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="array1">Array 1 (JSON)</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(array1Input, "Array 1")}
+                  className="h-8 w-8 p-0"
+                >
+                  {copiedField === "Array 1" ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <Textarea
                 id="array1"
                 value={array1Input}
@@ -359,7 +404,21 @@ export default function Component() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="array2">Array 2 (JSON)</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="array2">Array 2 (JSON)</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(array2Input, "Array 2")}
+                  className="h-8 w-8 p-0"
+                >
+                  {copiedField === "Array 2" ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <Textarea
                 id="array2"
                 value={array2Input}
@@ -590,6 +649,21 @@ export default function Component() {
                         </div>
                       </CardHeader>
                       <CardContent>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-muted-foreground">JSON Data</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(formatJson(diffItem.item), `${diffItem.type} item`)}
+                            className="h-6 w-6 p-0"
+                          >
+                            {copiedField === `${diffItem.type} item` ? (
+                              <Check className="h-3 w-3 text-green-600" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
                         <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">{formatJson(diffItem.item)}</pre>
                         {diffItem.differences && diffItem.differences.length > 0 && (
                           <div className="mt-3 space-y-1">
