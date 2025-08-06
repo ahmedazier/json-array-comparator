@@ -105,7 +105,7 @@ export function Header() {
             asChild
           >
             <Link
-              href="https://github.com"
+              href="https://github.com/ahmedazier/json-array-comparator"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -166,7 +166,7 @@ export function Header() {
                       asChild
                     >
                       <Link
-                        href="https://github.com"
+                        href="https://github.com/ahmedazier/json-array-comparator"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
