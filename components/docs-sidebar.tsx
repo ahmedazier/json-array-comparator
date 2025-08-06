@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { Badge } from "@/components/ui/badge"
 import {
   Sidebar,
   SidebarContent,
@@ -92,6 +93,7 @@ const data: { navMain: NavSection[] } = {
         {
           title: "Advanced Features",
           url: "#advanced-features",
+          comingSoon: true,
         },
         {
           title: "API Usage",
@@ -109,12 +111,9 @@ const data: { navMain: NavSection[] } = {
           url: "#data-types",
         },
         {
-          title: "Large Datasets",
-          url: "#large-datasets",
-        },
-        {
           title: "Validation",
           url: "#validation",
+          comingSoon: true,
         },
         {
           title: "Export Tips",
@@ -130,10 +129,12 @@ const data: { navMain: NavSection[] } = {
         {
           title: "Comparison Functions",
           url: "#comparison-functions",
+          comingSoon: true,
         },
         {
           title: "Configuration Options",
           url: "#configuration-options",
+          comingSoon: true,
         },
         {
           title: "Event Handlers",
@@ -234,10 +235,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                       >
                                         <span className="truncate flex-1">{item.title}</span>
                                         {item.comingSoon && (
-                                          <span className="ml-2 text-xs bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 dark:from-yellow-900 dark:to-orange-900 dark:text-yellow-200 px-2 py-0.5 rounded-full font-medium shadow-sm flex items-center gap-1 flex-shrink-0">
-                                            <Sparkles className="size-2" />
-                                            Coming Soon
-                                          </span>
+                                          <Badge className="ml-2 text-xs bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 dark:from-yellow-900 dark:to-orange-900 dark:text-yellow-200 px-2 py-0.5 rounded-full font-medium shadow-sm flex items-center gap-1 flex-shrink-0">
+                                            <Sparkles className="size-1.5" />
+                                            Soon
+                                          </Badge>
                                         )}
                                       </a>
                                     </SidebarMenuSubButton>
